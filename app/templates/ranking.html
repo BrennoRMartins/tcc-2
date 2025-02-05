@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <h1 id="recommendation-title">Recomendações</h1>
+    <ul id="video-list"></ul>
+
+    <div id="back-button-container">
+        <a href="avaliar.html" class="btn-avaliar" id="avaliar" >Avaliação</a>
+    </div>
+
+    <script>
+        function getEmotionFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('emotion');
+        }
+
+        const emotionColors = {
+            "alegria": "rgb(240, 224, 2)",
+            "tristeza": "rgb(0, 127, 224)",
+            "raiva": "rgb(219, 0, 48)",
+            "medo": "rgb(144, 0, 206)",
+            "surpresa": "rgb(224, 0, 105)",
+            "amor": "rgb(214, 36, 185)",
+            "nojo": "rgb(0, 206, 51)",
+            "curiosidade": "rgb(25, 61, 179)"
+        };
+
+        function setTitleColorAndText(emotion) {
+            const title = document.getElementById('recommendation-title');
+            const color = emotionColors[emotion] || "black";
+            title.style.color = color;
+
+            const emotionText = emotion ? ` - ${emotion.charAt(0).toUpperCase() + emotion.slice(1)}` : '';
+            title.textContent = `Recomendações${emotionText}`;
+        }
+
+        async function fetchRankings(emotion) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/rankings?emotion=${emotion}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const videos = await response.json();
+                if (!Array.isArray(videos)) {
+                    throw new Error('Resposta do servidor não é uma lista.');
+                }
+
+                const videoList = document.getElementById('video-list');
+                videoList.innerHTML = '';
+
+                for (const video of videos) {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('video-item');
+
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${video.video_id}`;
+                    iframe.width = '320';
+                    iframe.height = '180';
+                    iframe.style.border = 'none';
+
+                    const titleElement = document.createElement('p');
+                    titleElement.textContent = video.title;
+                    titleElement.className = 'video-title';
+
+                    const canvas = document.createElement('canvas');
+                    canvas.id = `chart-${video.video_id}`;
+                    canvas.width = 320;
+                    canvas.height = 200;
+
+                    listItem.appendChild(iframe);
+                    listItem.appendChild(titleElement);
+                    listItem.appendChild(canvas);
+                    videoList.appendChild(listItem);
+
+                    createChart(video.video_id, canvas.id);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar rankings:', error);
+            }
+        }
+
+        async function fetchChartData(videoId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/chart-data?video_id=${videoId}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar dados para o gráfico:', error);
+            }
+        }
+
+        async function createChart(videoId, canvasId) {
+            const data = await fetchChartData(videoId);
+
+            if (data && Array.isArray(data)) {
+                const labels = data.map(item => item.emotion_set);
+
+                // Transformação das pontuações em porcentagens
+                const scoresOriginal = data.map(item => item.normalized_score);
+                const somaScores = scoresOriginal.reduce((sum, score) => sum + score, 0);
+                const scores = scoresOriginal.map(score => (score / somaScores) * 100);
+
+                // Mapear cores para as barras
+                const colors = labels.map(emotion => emotionColors[emotion] || "rgba(200, 200, 200, 0.5)");
+
+                // Obter a emoção selecionada e sua cor
+                const emotion = getEmotionFromURL();
+                const selectedEmotionColor = emotionColors[emotion] || "rgba(0, 0, 0, 0.5)";
+                const selectedEmotionName = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `Pontuação`,
+                            data: scores,
+                            backgroundColor: colors,
+                            borderColor: colors.map(color => color.replace("0.5", "1")),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value + '%'; // Mostrar porcentagem no eixo Y
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    generateLabels: function (chart) {
+                                        const dataset = chart.data.datasets[0];
+                                        return [{
+                                            text: `Emoção Escolhida - ${selectedEmotionName}`,
+                                            fillStyle: selectedEmotionColor, // Cor do bloco
+                                            fontColor: 'white', // Cor do texto padrão
+                                        }];
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.raw.toFixed(2)}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        window.onload = function () {
+            const emotion = getEmotionFromURL();
+            if (emotion) {
+                setTitleColorAndText(emotion);
+                fetchRankings(emotion);
+            } else {
+                console.error('Nenhuma emoção selecionada.');
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="feedback-form">
+        <h2>Avaliação</h2>
+        <form id="feedbackForm" action="submit-feedback" method="POST">
+            <div class="rating">
+                <input type="radio" id="star5" name="rating" value="5">
+                <label for="star5">&#9733;</label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="star4">&#9733;</label>
+                <input type="radio" id="star3" name="rating" value="3">
+                <label for="star3">&#9733;</label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="star2">&#9733;</label>
+                <input type="radio" id="star1" name="rating" value="1">
+                <label for="star1">&#9733;</label>
+            </div>
+
+            <div class="comment">
+                <label for="comment">Deixe sua opinião</label><br>
+                <textarea id="comment" name="comment" placeholder="Digite aqui..."></textarea>
+            </div>
+
+            <div class="email">
+                <label for="email">E-mail (opcional)</label><br>
+                <input type="email" id="email" name="email" placeholder="aaaaaaa@aaaaaaaa.com">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn" >Enviar</button>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
