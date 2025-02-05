@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolha Uma</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+
+</head>
+<body>
+    <h1>Escolha Uma</h1>
+
+    <div class="button-container">
+        <a href="#" class="btn3 alegria" id="alegria">Alegria🥳</a>
+        <a href="#" class="btn3 medo" id="medo">Medo😨</a>
+        <a href="#" class="btn3 raiva" id="raiva">Raiva😠</a>
+        <a href="#" class="btn3 tristeza" id="tristeza">Tristeza☹️</a>
+    </div>
+    <div class="button-container">
+        <a href="#" class="btn3 nojo" id="nojo">Nojo😖</a>
+        <a href="#" class="btn3 amor" id="amor">Amor🥰</a>
+        <a href="#" class="btn3 surpresa" id="surpresa">Surpresa😲</a>
+        <a href="#" class="btn3 curiosidade" id="curiosidade">Curiosidade🤯</a>
+    </div> 
+
+    <div id="pronto-container">
+        <a href="#" class="btn3" id="pronto">Pronto</a>
+    </div>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
