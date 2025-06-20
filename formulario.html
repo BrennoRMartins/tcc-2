@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_formulario.css') }}">
+    <title>Avaliar</title>
+</head>
+<body>
+    <div class="texto-container">
+        <h1>Deixe sua avaliação!</h1>
+        <p>Você será redirecionado para um formulário Google Forms para responder algumas perguntas!</p>
+        <a href="#" class="btn3" onclick="avaliar()">Avaliar</a>
+    </div>
+
+    <script>
+        function avaliar() {
+            window.open('https://forms.gle/VRckt7Tj87rCbpak9', '_blank');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
